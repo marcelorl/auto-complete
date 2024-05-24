@@ -12,7 +12,7 @@ const AutoComplete: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetch('/data.json')
+    fetch('/auto-complete/data.json')
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
