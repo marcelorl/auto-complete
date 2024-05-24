@@ -1,10 +1,15 @@
-import React, { useState, useMemo, useCallback, useTransition, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useTransition, useEffect, useRef } from 'react';
 
 const AutoComplete: React.FC = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<string[]>([]);
   const [allData, setAllData] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
+  const inputSearchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputSearchRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     fetch('/data.json')
@@ -54,6 +59,7 @@ const AutoComplete: React.FC = () => {
   const handleSelect = useCallback((value: string) => {
     setQuery(value);
     setResults([]);
+    inputSearchRef.current?.focus();
   }, []);
 
   const memoizedResults = useMemo(() => {
@@ -70,7 +76,7 @@ const AutoComplete: React.FC = () => {
 
   return (
     <div>
-      <input type="text" value={query} onChange={handleChange} placeholder="Search..." />
+      <input type="text" value={query} onChange={handleChange} placeholder="Search..." ref={inputSearchRef} />
       {isPending && <div>Loading...</div>}
       <ul>{memoizedResults}</ul>
       {isNotFound && <div>No results</div>}
