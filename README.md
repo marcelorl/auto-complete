@@ -13,6 +13,7 @@ This project is a simple, yet comprehensive auto-complete component with search 
  - Provides auto-complete suggestions as the user types.
  - Handles errors gracefully using an error boundary component.
  - Optimized for performance using React hooks (useMemo, useCallback, useTransition).
+ - Build application on [github pages](https://marcelorl.github.io/auto-complete/) for every push on main
 
 ## Installation
 
