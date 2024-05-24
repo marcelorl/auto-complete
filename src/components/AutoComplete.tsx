@@ -1,36 +1,21 @@
-import React, { useState, useMemo, useCallback, useTransition, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useTransition } from 'react';
+import { useFocusInput } from '../hooks/useFocusInput.ts';
 
-const AutoComplete: React.FC = () => {
-  const [query, setQuery] = useState('');
+type AutoCompleteProps = {
+  query: string;
+  onChange: (str: string) => void;
+  allData: string[];
+};
+
+const AutoComplete: React.FC<AutoCompleteProps> = ({ query, onChange, allData }) => {
   const [results, setResults] = useState<string[]>([]);
-  const [allData, setAllData] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
-  const inputSearchRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputSearchRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    fetch('/auto-complete/data.json')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        return response.json();
-      })
-      .then((data: Array<{ email: string }>) => setAllData(data.map((item) => item.email)))
-      .catch((error) => {
-        console.error('Failed to load data', error);
-        throw error;
-      });
-  }, []);
+  const { ref, setFocus } = useFocusInput();
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = event.target;
-      setQuery(value);
+      onChange(value);
 
       startTransition(() => {
         if (value.trim() === '') {
@@ -53,14 +38,17 @@ const AutoComplete: React.FC = () => {
         }
       });
     },
-    [allData],
+    [allData, onChange],
   );
 
-  const handleSelect = useCallback((value: string) => {
-    setQuery(value);
-    setResults([]);
-    inputSearchRef.current?.focus();
-  }, []);
+  const handleSelect = useCallback(
+    (value: string) => {
+      onChange(value);
+      setResults([]);
+      setFocus();
+    },
+    [onChange, setFocus],
+  );
 
   const memoizedResults = useMemo(() => {
     return results.map((result) => (
@@ -76,7 +64,7 @@ const AutoComplete: React.FC = () => {
 
   return (
     <div>
-      <input type="text" value={query} onChange={handleChange} placeholder="Search..." ref={inputSearchRef} />
+      <input type="text" value={query} onChange={handleChange} placeholder="Search..." ref={ref} />
       {isPending && <div>Loading...</div>}
       <ul>{memoizedResults}</ul>
       {isNotFound && <div>No results</div>}
